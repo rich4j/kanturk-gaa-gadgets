@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+    <ModulePrefs title="Picasa Picture Gallery Gadget" height="1000">
+        <Require feature="dynamic-height"/>
+    </ModulePrefs>
+    <UserPref name="url" display_name="User Id" required="true"  default_value="115305915046652135931" />
+    <UserPref name="view" display_name="View" default_value="DEFAULT" datatype="enum" >
+        <EnumValue value="DEFAULT" />
+        <EnumValue value="SLIDER" />
+    </UserPref>
+    <UserPref name="theme" display_name="Theme" default_value="DEFAULT" datatype="enum" >
+        <EnumValue value="DEFAULT" />
+        <EnumValue value="YELLOW" />
+    </UserPref>
+    <Content type="html">
+     <![CDATA[
+<html>
+    <head>
+        <script charset="utf-8" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js" type="text/javascript"></script>
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.5.3/jquery-ui.min.js" ></script>
+        <script src="http://gaakanturk.appspot.com/gadgets/picasa/jquery.picasa.js" type="text/javascript" charset="utf-8"></script>
+        <script src="http://gaakanturk.appspot.com/gadgets/youtube/jquery.prettydate.js" type="text/javascript" charset="utf-8"></script>
+        <script src="http://gaakanturk.appspot.com/gadgets/gallery/gallery.js" type="text/javascript" charset="utf-8"></script>
+        <link rel="stylesheet" href="http://gaakanturk.appspot.com/gadgets/picasa/picasa.css" />
+        <link rel="stylesheet" href="http://gaakanturk.appspot.com/gadgets/youtube/video.css" />
+        <link rel="stylesheet" href="http://gaakanturk.appspot.com/gadgets/gallery/gallery.css" />
+        <!--[if IE]>
+        <style type="text/css">
+        .picasa-album li {
+    background: none repeat scroll 0 0 transparent !important;
+    display: inline !important;
+    list-style: none outside none;
+    margin: 10px;
+    visibility: hidden;
+}
+.picasa-image img{
+    background: none repeat scroll 0 0 white;
+    padding: 10px;
+    -moz-box-shadow: 0 1px 4px #AAAAAA;
+    -webkit-box-shadow: 0 1px 4px #AAAAAA;
+    -o-box-shadow: 0 1px 4px #AAAAAA;
+    vertical-align: bottom;
+}
+        </style>
+        <![endif]-->
+    </head>
+    <body>
+        <script type="text/javascript" charset="utf-8">
+            var prefs = new gadgets.Prefs();
+            var album = prefs.getString("url");
+            $(document).ready(function() {
+                loadTheme();
+                loadAlbums();
+            });
+            
+            function loadTheme(){
+                if(prefs.getString("theme") == 'YELLOW'){
+                    loadjscssfile("http://gaakanturk.appspot.com/gadgets/picasa/themes/yellow.css", "css") ////dynamically load and add this .css file
+                }
+            };
+            
+            function loadjscssfile(filename, filetype){
+                if (filetype=="js"){ //if filename is a external JavaScript file
+                    var fileref=document.createElement('script')
+                    fileref.setAttribute("type","text/javascript")
+                    fileref.setAttribute("src", filename)
+                }
+                else if (filetype=="css"){ //if filename is an external CSS file
+                    var fileref=document.createElement("link")
+                    fileref.setAttribute("rel", "stylesheet")
+                    fileref.setAttribute("type", "text/css")
+                    fileref.setAttribute("href", filename)
+                }
+                if (typeof fileref!="undefined")
+                    document.getElementsByTagName("head")[0].appendChild(fileref)
+            };
+
+            function loadAlbums(){
+                $("#picasa-gallery").picasaAlbums(album, function(images) {
+                    var html = "";
+                    $.each(images, function(i, element) {
+                        html += '<div class="result-item">';
+                        html += '<a class="ux-thumb-wrap result-item-thumb" href="#" onclick="javascript:loadImagesFromAlbum(\'' + album + '\',\'' + element.id + '\');return false;">';
+                        html += '<span class="video-thumb ux-thumb-128 "><span class="clip"><img alt="Thumbnail" src="' + element.thumb + '"></span></span>';
+                        html += '<span class="video-time">View Album</span>';
+                        html += '</a>';
+
+                        html += '<div class="result-item-main-content">';
+                        html += '<h3 dir="ltr">';
+                        html += '<a title="' + element.title + '" href="#" onclick="javascript:loadImagesFromAlbum(\'' + album + '\',\'' + element.id + '\');return false;">' + element.title + '</a>';
+                        html += '</h3>';
+
+                        html += '<p class="search-ad-description">';
+                        html += element.description;
+                        html += '</p>';
+
+                        html += '<p class="facets">';
+                        html += '<strong dir="ltr">' + prettyDate(element.published) + '</strong>';
+                        html += '</p>';
+
+                        html += '</div>';
+                        html += '</div>';
+                    });
+                    $("#picasa-gallery").html(html);
+
+                    // smoother animation
+                    setTimeout(function() {
+                        $(".picasa-image").each(function(index, element) {
+                            $(element).css("visibility", "visible").css("opacity", 0)
+                            .delay((50 * index))
+                            .animate({opacity:1}, 300);
+                        });
+                    }, 300);
+                    setTimeout(function() {
+                        gadgets.window.adjustHeight($('#picasa-gallery').height());
+                    }, 500);
+                });
+            }
+
+            function loadImagesFromAlbum(userId, albumId){
+                $("#picasa-gallery").html('<div class="loading_image">&nbsp;</div>');
+                if(prefs.getString("view") == 'SLIDER'){
+                    doSlider(userId, albumId);
+                } else {
+                    doPolaroid(userId, albumId);
+                }
+            }
+
+            function doPolaroid(userId, albumId){
+                $("#picasa-gallery").picasaGallery(userId, albumId, function(images) {
+                    var picasaAlbum = "<ul class='picasa-album'>\n";
+                    $.each(images, function(i, element) {
+                        picasaAlbum += "  <li class='picasa-image'>\n";
+                        picasaAlbum += "    <a target='_blank' href='" + element.url + "' class='picasa-image-large' rel='prettyPhoto[picasa]'>\n";
+                        picasaAlbum += "      <img class='picasa-image-thumb' src='" + element.thumbs[0].url + "' />\n";
+                        picasaAlbum += "    </a>\n";
+                        picasaAlbum += "  </li>\n";
+                    });
+                    picasaAlbum += "</ul>";
+                    $("#picasa-gallery").html(picasaAlbum);
+                    $("#picasa-gallery").prepend('<div style="padding: 10px;"><a href="#" onclick="loadAlbums();return false;">back</a></div>');
+
+                    // smoother animation
+                    setTimeout(function() {
+                        $(".picasa-image").each(function(index, element) {
+                            $(element).css("visibility", "visible").css("opacity", 0)
+                            .delay((50 * index))
+                            .animate({opacity:1}, 300);
+                        });
+                    }, 300);
+                    setTimeout(function() {
+                        gadgets.window.adjustHeight($('#picasa-gallery').height());
+                    }, 400);
+                });
+            }
+
+            function doSlider(userId, albumId){
+                $("#picasa-gallery").picasaGallery(userId, albumId, function(images) {
+                    var picasaAlbum = '<div class="gallery_container"><div id="gallery" class="ad-gallery"><div class="ad-image-wrapper">\n';
+                    picasaAlbum += '</div><div class="ad-controls"></div>\n';
+                    picasaAlbum += '<div class="ad-nav">\n';
+                    picasaAlbum += '<div class="ad-thumbs">\n';
+                    picasaAlbum += '<ul class="ad-thumb-list">\n';
+                    $.each(images, function(i, element) {
+                        picasaAlbum += "  <li>\n";
+                        picasaAlbum += "    <a href='" + element.url + "'>\n";
+                        picasaAlbum += "      <img src='" + element.thumbs[0].url + "' title='" + element.title + "'  alt='" + element.description + "'/>\n";
+                        picasaAlbum += "    </a>\n";
+                        picasaAlbum += "  </li>\n";
+                    });
+                    picasaAlbum += "</ul></div></div></div></div>";
+                    $("#picasa-gallery").html(picasaAlbum);
+                    $("#picasa-gallery").prepend('<div style="padding: 10px;"><a href="#" onclick="loadAlbums();return false;">back</a></div>');
+                    $("#gallery").prepend('<h3 class="gallery_title">' + images[0].gallery + '</h3>');
+                    $("#gallery").append('<p class="info_box">Hint: you can use the left and right arrow keys to flick through the images.</p>');
+                    var galleries = $('.ad-gallery').adGallery({width: 550});
+                });
+                gadgets.window.adjustHeight(800);
+            }
+        </script>
+        <div id="picasa-gallery"><div class="loading_image">&nbsp;</div></div>
+    </body>
+</html>
+
+     ]]>
+    </Content>
+</Module>

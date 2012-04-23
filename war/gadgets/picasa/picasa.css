@@ -1,0 +1,33 @@
+.picasa-album {
+    list-style: none outside none;
+}
+.picasa-album li {
+    background: none repeat scroll 0 0 transparent !important;
+    display: inline-block !important;
+    list-style: none outside none;
+    margin: 10px;
+    visibility: hidden;
+}
+.picasa-image img{
+    background: none repeat scroll 0 0 white;
+    padding: 10px;
+    -moz-box-shadow: 0 1px 4px #AAAAAA;
+    -webkit-box-shadow: 0 1px 4px #AAAAAA;
+    -o-box-shadow: 0 1px 4px #AAAAAA;
+    vertical-align: bottom;
+}
+html, body, div, span, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, abbr, address, cite, code, del, dfn, em, img, ins, kbd, q, samp, small, strong, sub, sup, var, b, i, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, dialog, figure, footer, header, hgroup, menu, nav, section, time, mark, audio, video {
+    background: none repeat scroll 0 0 transparent;
+    border: 0 none;
+    font-size: 100%;
+    margin: 0;
+    outline: 0 none;
+    padding: 0;
+    vertical-align: baseline;
+}
+.album img{
+    width: 100px;
+}
+#picasa-gallery{
+    margin-bottom: 50px;
+}

@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+    <ModulePrefs title="Rotating News Gadget" />
+    <UserPref name="url" display_name="RSS Url" required="true" />
+    <UserPref name="generic1" display_name="Image 1" required="true" />
+    <UserPref name="generic2" display_name="Image 2" required="true" />
+    <UserPref name="generic3" display_name="Image 3" required="true" />
+    <UserPref name="generic4" display_name="Image 4" required="true" />
+    <UserPref name="changeUrl" display_name="Change Google url?" datatype="bool" default_value="false"/>
+    <UserPref name="urlToReplace" display_name="Url to replace" required="false" />
+    <UserPref name="urlToReplaceWith" display_name="New url" required="false" />
+    <Content type="html">
+     <![CDATA[
+<html>
+    <head>
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js" ></script>
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.5.3/jquery-ui.min.js" ></script>
+        <style type="text/css">
+            #featured{
+                width:400px;
+                padding: 3px 256px 3px 3px;
+                position:relative;
+                height:250px;
+                background:#fff;
+            }
+            #featured ul.ui-tabs-nav{
+                position:absolute;
+                top:3px;
+                left:406px;
+                list-style:none;
+                padding:0; margin:0;
+                width:250px;
+            }
+            #featured ul.ui-tabs-nav li{
+                color:#005596;
+                padding-bottom: 3.2px;
+            }
+            #featured ul.ui-tabs-nav li span{
+                line-height:18px;
+            }
+            #featured .ui-tabs-panel{
+                width:400px; height:250px;
+                background:#999; position:relative;
+                overflow:hidden;
+            }
+            #featured .ui-tabs-hide{
+                display:none;
+            }
+            #featured li.ui-tabs-nav-item a{/*On Hover Style*/
+                                            display:block;
+                                            height:60px;
+                                            color:#333;  background:#fff;
+                                            line-height:20px;
+                                            outline:none;
+            }
+            #featured li.ui-tabs-nav-item a:hover{
+                background:#f2f2f2;
+            }
+            #featured ul.ui-tabs-nav li a{
+                text-decoration:none;
+                font: 10pt Arial,sans-serif;
+                font-weight:bold;
+                color:#005596;
+                -moz-opacity:.50; filter:alpha(opacity=50); opacity:.50;
+            }
+            #featured ul.ui-tabs-nav li.ui-tabs-selected a{
+                -moz-opacity:1.0; filter:alpha(opacity=100); opacity:1.0;
+            }
+            #featured ul.ui-tabs-nav li img{
+                float:left; margin:2px 5px;
+                background:#fff;
+                padding:2px;
+                border:1px solid #eee;
+            }
+            #featured .ui-tabs-panel .info{
+                font: 10pt Arial,sans-serif;
+                position:absolute;
+                top:150px; left:0;
+                height:100px; width: 400px;
+                background: url('http://gaakanturk.appspot.com/gadgets/rotate_news/transparent-bg.png');
+            }
+            #featured .info h2{
+                font-size:12pt;
+                color:#fff; padding:5px; margin:0;
+                max-height: 15px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                -o-text-overflow: ellipsis;
+                white-space: nowrap;
+                width: 380px;
+            }
+            #featured .info p{
+                font: 10pt Arial,sans-serif;
+                margin:0 5px;
+                line-height:15px; color:#f0f0f0;
+                height: 47px;
+                overflow: hidden;
+            }
+            #featured .info p.readMore{
+                font: 10pt Arial,sans-serif;
+                margin:0 5px;
+                line-height:15px; color:#f0f0f0;
+                height: 30px;
+                padding-top: 5px;
+                overflow: hidden;
+            }
+            #featured .info a{
+                text-decoration:none;
+                color:#fff;
+            }
+            #featured .info a:hover{
+                text-decoration:underline;
+            }
+
+        </style>
+    </head>
+    <body>
+        <script type="text/javascript">
+            var prefs = new gadgets.Prefs();
+            function makeDOMRequest() {
+                var params = {};
+                params[gadgets.io.RequestParameters.CONTENT_TYPE] = gadgets.io.ContentType.DOM;
+                params[gadgets.io.RequestParameters.REFRESH_INTERVAL] = 60;
+                var url = prefs.getString("url");
+                gadgets.io.makeRequest(url, response, params);
+            };
+
+            function response(obj) {
+                var data = obj.data;
+                var count = 1;
+                        $(data).find('entry:lt(4)').each(function(){
+                            var img = '';
+                            switch(count){
+                                case 1:
+                                    img = prefs.getString("generic1");
+                                    break;
+                                case 2:
+                                    img = prefs.getString("generic2");
+                                    break;
+                                case 3:
+                                    img = prefs.getString("generic3");
+                                    break;
+                                case 4:
+                                    img = prefs.getString("generic4");
+                                    break;
+                            }
+
+                            if($(this).find('img:first').length > 0){
+                                img = $(this).find('img:first').attr('src');
+                            }
+                            $('#navDiv').append('<li class="ui-tabs-nav-item" id="nav-fragment-' + count + '"><a href="#fragment-' + count + '"><img src="' + img + '" width="80" height="50" alt="" /><span>' + $(this).find('title').text() + '</span></a></li>');
+                            var body = removeHtml($(this).find('content').text());
+                            var link = $(this).find("link[type='text/html']").attr('href');
+                            if(prefs.getBool("changeUrl") == true){
+                                link = link.replace(prefs.getString("urlToReplace"),prefs.getString("urlToReplaceWith"));
+                            }
+                            $('#featured').append('<div id="fragment-' + count + '" class="ui-tabs-panel" style=""><img src="' + img + '" alt="" height="250" width="400"/><div class="info" ><h2><a href="' + link + '" target="_parent" >' + $(this).find('title').text() + '</a></h2><p>' + body + '</p><p class="readMore"><a href="' + link + '" target="_parent" >Read more >></a></p></div></div>')
+                            count++;
+                        });
+                        $("#featured > ul").tabs({fx:{opacity: "toggle"}}).tabs("rotate", 8000, true);
+            };
+
+            function removeHtml(s){
+                return s.replace(/(<.*?>)/ig,"");
+            };
+            gadgets.util.registerOnLoadHandler(makeDOMRequest);
+        </script>
+        <div id="featured" >
+            <ul id="navDiv" class="ui-tabs-nav"></ul>
+        </div>
+    </body>
+</html>
+
+     ]]>
+    </Content>
+</Module>
