@@ -141,7 +141,7 @@
   </Content> 
   <Content type="html" view="home, canvas"> 
     <![CDATA[ 
-    <script src="https://widgets.twimg.com/j/2/widget.js"></script> 
+    <script src="http://gaakanturk.appspot.com/gadgets/twitter/widget.js"></script> 
     <script> 
     function Initialize() { 
       var dimensions = gadgets.window.getViewportDimensions(); 
